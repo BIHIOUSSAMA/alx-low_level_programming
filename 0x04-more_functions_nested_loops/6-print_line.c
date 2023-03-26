@@ -1,22 +1,6 @@
 #include "main.h"
 
 /**
- * main - check the code
- *
- * Return: Always 0.
- */
-int main(void)
-{
-    more_numbers();
-    return (0);
-}
-
-
-6-print_line.c
-
-#include "main.h"
-
-/**
  * print_line - draws a straight line in the terminal
  * @n: number of times the character _ should be printed
  */

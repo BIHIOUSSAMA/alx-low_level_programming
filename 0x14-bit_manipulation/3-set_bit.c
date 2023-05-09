@@ -1,9 +1,9 @@
 #include "main.h"
 
 /**
- * set_bit - a function that changes the value of a bit to 1 at the specified index
- * @n: A pointer that references the number to be modified.
- * @index: The position of the bit that needs to be changed to 1
+ * set_bit - Function to set a bit at a given index to 1.
+ * @n: Pointer to the number to be changed.
+ * @index: Bit index to set to 1
  *
  * Return: 1 for success, -1 for failure
  */

@@ -2,16 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char *allocate_buffer(char *file);
-void close_file_descriptor(int fd);
+char *create_buffer(char *file);
+void close_file(int fd);
 
 /**
- * allocate_buffer - Allocates a buffer of size 1024 bytes.
- * @file: The name of the file for which the buffer is allocated.
+ * create_buffer - Allocates 1024 bytes for a buffer.
+ * @file: The name of the file buffer is storing chars for.
  *
- * Return: A pointer to the newly allocated buffer.
+ * Return: A pointer to the newly-allocated buffer.
  */
-char *allocate_buffer(char *file)
+char *create_buffer(char *file)
 {
 	char *buffer;
 
@@ -19,7 +19,8 @@ char *allocate_buffer(char *file)
 
 	if (buffer == NULL)
 	{
-		dprintf(STDERR_FILENO, "Error: Cannot write to %s\n", file);
+		dprintf(STDERR_FILENO,
+			"Error: Can't write to %s\n", file);
 		exit(99);
 	}
 
@@ -27,38 +28,37 @@ char *allocate_buffer(char *file)
 }
 
 /**
- * close_file_descriptor - Closes a file descriptor.
+ * close_file - Closes file descriptors.
  * @fd: The file descriptor to be closed.
  */
-void close_file_descriptor(int fd)
+void close_file(int fd)
 {
-	int result;
+	int c;
 
-	result = close(fd);
+	c = close(fd);
 
-	if (result == -1)
+	if (c == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Cannot close file descriptor %d\n", fd);
+		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
 		exit(100);
 	}
 }
 
 /**
- * main - Copies the contents of one file to another.
- * @argc: The number of arguments passed to the program.
+ * main - Copies the contents of a file to another file.
+ * @argc: The number of arguments supplied to the program.
  * @argv: An array of pointers to the arguments.
  *
  * Return: 0 on success.
  *
- * Description: Exits with the following error codes:
- *   - 97 if the argument count is incorrect.
- *   - 98 if the source file does not exist or cannot be read.
- *   - 99 if the destination file cannot be created or written to.
- *   - 100 if any file descriptor cannot be closed.
+ * Description: If the argument count is incorrect - exit code 97.
+ *              If file_from does not exist or cannot be read - exit code 98.
+ *              If file_to cannot be created or written to - exit code 99.
+ *              If file_to or file_from cannot be closed - exit code 100.
  */
 int main(int argc, char *argv[])
 {
-	int source_file, destination_file, read_bytes, write_bytes;
+	int from, to, r, w;
 	char *buffer;
 
 	if (argc != 3)
@@ -67,35 +67,38 @@ int main(int argc, char *argv[])
 		exit(97);
 	}
 
-	buffer = allocate_buffer(argv[2]);
-	source_file = open(argv[1], O_RDONLY);
-	read_bytes = read(source_file, buffer, 1024);
-	destination_file = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	buffer = create_buffer(argv[2]);
+	from = open(argv[1], O_RDONLY);
+	r = read(from, buffer, 1024);
+	to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
 
 	do {
-		if (source_file == -1 || read_bytes == -1)
+		if (from == -1 || r == -1)
 		{
-			dprintf(STDERR_FILENO, "Error: Cannot read from file %s\n", argv[1]);
+			dprintf(STDERR_FILENO,
+				"Error: Can't read from file %s\n", argv[1]);
 			free(buffer);
 			exit(98);
 		}
 
-		write_bytes = write(destination_file, buffer, read_bytes);
-		if (destination_file == -1 || write_bytes == -1)
+		w = write(to, buffer, r);
+		if (to == -1 || w == -1)
 		{
-			dprintf(STDERR_FILENO, "Error: Cannot write to %s\n", argv[2]);
+			dprintf(STDERR_FILENO,
+				"Error: Can't write to %s\n", argv[2]);
 			free(buffer);
 			exit(99);
 		}
 
-		read_bytes = read(source_file, buffer, 1024);
-		destination_file = open(argv[2], O_WRONLY | O_APPEND);
+		r = read(from, buffer, 1024);
+		to = open(argv[2], O_WRONLY | O_APPEND);
 
-	} while (read_bytes > 0);
+	} while (r > 0);
 
 	free(buffer);
-	close_file_descriptor(source_file);
-	close_file_descriptor(destination_file);
+	close_file(from);
+	close_file(to);
 
 	return (0);
 }
+
